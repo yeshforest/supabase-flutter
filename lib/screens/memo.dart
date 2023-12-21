@@ -81,7 +81,12 @@ class _MemoScreenState extends State<MemoScreen> {
     String title = titleController.text;
     String content = contentController.text;
     // 데이터 삽입
-    await supabase.from('memos').insert({'title':title,'content':content});
-
+    await supabase.from('memos').insert({'title':title,'content':content}).then((value){
+      var snackbar = const SnackBar(
+        content: Text('저장 완료!'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+    }
+    );
   }
 }
