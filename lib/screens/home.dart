@@ -12,6 +12,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<MemoModel>> memoList;
+  final supabase = Supabase.instance.client;
+
 
   @override
   void initState() {
@@ -60,10 +62,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              ml[index].title,
-                              style: const TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.w800),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  ml[index].title,
+                                  style: const TextStyle(
+                                      fontSize: 24, fontWeight: FontWeight.w800),
+                                ),
+                                IconButton(onPressed: () => deleteItem(ml[index].id), icon: const Icon(Icons.delete_forever),)
+                              ],
                             ),
                             Text(
                               ml[index].content,
@@ -104,8 +112,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
     List<MemoModel> memoModel = [];
     List<Map<String, dynamic>> data =
-        await Supabase.instance.client.from("memos").select();
+        await supabase.from("memos").select();
     memoModel = data.map((e) => MemoModel.fromJson(e)).toList();
     return memoModel;
+  }
+
+  void deleteItem(int itemId) async{
+    /// 해당 리스트 아이템 삭제하는 함수
+    await supabase
+        .from('memos')
+        .delete()
+        .match({ 'id': itemId });
+
+    var snackbar = const SnackBar(
+      content: Text('삭제완료!'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+
+    setState(() {
+      memoList = getAllMemo();
+    });
   }
 }
